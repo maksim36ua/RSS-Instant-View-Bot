@@ -1,3 +1,4 @@
-# Debugging a C# Azure Bot Service bot in Visual Studio 
+To debug bot:
 
-To learn how to debug Azure Bot Service bots, please visit https://aka.ms/bf-docs-azure-debug
+cd %directory%
+func host start
