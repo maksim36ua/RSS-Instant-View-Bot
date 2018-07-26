@@ -1,2 +1,3 @@
-# RSS-Instant-View-Bot
-Telegram Bot for posting articles from RSS to telegra.ph
+# Debugging a C# Azure Bot Service bot in Visual Studio 
+
+To learn how to debug Azure Bot Service bots, please visit https://aka.ms/bf-docs-azure-debug
