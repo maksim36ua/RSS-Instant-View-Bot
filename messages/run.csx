@@ -1,5 +1,5 @@
 #r "Newtonsoft.Json"
-#load "EchoDialog.csx"
+#load "ProcessMessage.csx"
 
 using System;
 using System.Net;
@@ -25,7 +25,6 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
 {
     log.Info($"Webhook was triggered!");
 
-    // Initialize the azure bot
     using (BotService.Initialize())
     {
         // Deserialize the incoming activity
@@ -41,39 +40,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
         
         if (activity != null)
         {
-            // one of these will have an interface and process it
-            switch (activity.GetActivityType())
-            {
-                case ActivityTypes.Message:
-                    await Conversation.SendAsync(activity, () => new EchoDialog());
-                    break;
-                case ActivityTypes.ConversationUpdate:
-                    var client = new ConnectorClient(new Uri(activity.ServiceUrl));
-                    IConversationUpdateActivity update = activity;
-                    if (update.MembersAdded.Any())
-                    {
-                        var reply = activity.CreateReply();
-                        var newMembers = update.MembersAdded?.Where(t => t.Id != activity.Recipient.Id);
-                        foreach (var newMember in newMembers)
-                        {
-                            reply.Text = "Welcome";
-                            if (!string.IsNullOrEmpty(newMember.Name))
-                            {
-                                reply.Text += $" {newMember.Name}";
-                            }
-                            reply.Text += "!";
-                            await client.Conversations.ReplyToActivityAsync(reply);
-                        }
-                    }
-                    break;
-                case ActivityTypes.ContactRelationUpdate:
-                case ActivityTypes.Typing:
-                case ActivityTypes.DeleteUserData:
-                case ActivityTypes.Ping:
-                default:
-                    log.Error($"Unknown activity type ignored: {activity.GetActivityType()}");
-                    break;
-            }
+			Conversation.SendAsync(activity, () => new ProcessMessage());
         }
         return req.CreateResponse(HttpStatusCode.Accepted);
     }    
