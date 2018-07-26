@@ -1,4 +1,7 @@
 using System;
+using System.Web;
+using System.Xml;
+using System.Xml.Linq;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
@@ -54,9 +57,16 @@ public class ProcessMessage : IDialog<object>
 
 	public async Task GetArticles(IDialogContext context)
 	{
-		await context.PostAsync($"Article 1");
-		await context.PostAsync($"Article 2");
-		await context.PostAsync($"Article 3");
+		using (HttpClient client = new HttpClient())
+		{
+			var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
+			XmlReader reader = XmlReader.Create(contentStream);
+			var response = XDocument.Load(reader);
+			foreach (var link in response.Descendants("link").Skip(2).Take(15).ToList())
+			{
+				await context.PostAsync($"{link.Value}");
+			}
+		}
 	}
 
 	public async Task AfterResetAsync(IDialogContext context, IAwaitable<bool> argument)
