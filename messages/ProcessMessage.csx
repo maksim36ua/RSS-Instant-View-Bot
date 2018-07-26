@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
-
+using Newtonsoft.Json;
 
 [Serializable]
 public class ProcessMessage : IDialog<object>
@@ -39,7 +39,7 @@ public class ProcessMessage : IDialog<object>
         }
         else
         {
-            await context.PostAsync($"You said {message.Text}. Your message body: {message.ToString()}");
+            await context.PostAsync($"You said {message.Text}. Your message body: {JsonConvert.SerializeObject(message)}");
             context.Wait(MessageReceivedAsync);
         }
     }
@@ -49,7 +49,6 @@ public class ProcessMessage : IDialog<object>
         var confirm = await argument;
         if (confirm)
         {
-            this.count = 1;
             await context.PostAsync("Reset count.");
         }
         else
