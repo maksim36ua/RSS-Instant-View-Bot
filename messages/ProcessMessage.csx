@@ -7,7 +7,6 @@ using Microsoft.Bot.Connector;
 [Serializable]
 public class ProcessMessage : IDialog<object>
 {
-    protected int count = 1;
 
     public Task StartAsync(IDialogContext context)
     {
@@ -32,8 +31,7 @@ public class ProcessMessage : IDialog<object>
         var message = await argument;
         if (message.Text == "reset")
         {
-            PromptDialog.Confirm(
-                context,
+            PromptDialog.Confirm(context,
                 AfterResetAsync,
                 "Are you sure you want to reset the count?",
                 "Didn't get that!",
@@ -41,7 +39,7 @@ public class ProcessMessage : IDialog<object>
         }
         else
         {
-            await context.PostAsync($"{this.count++}: You said {message.Text}");
+            await context.PostAsync($"You said {message.Text}. Your message body: {message.ToString()}");
             context.Wait(MessageReceivedAsync);
         }
     }
