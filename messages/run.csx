@@ -21,8 +21,7 @@ using Microsoft.Bot.Connector;
 // -CosmosDbEndpoint set to your cosmos db endpoint
 // -CosmosDbKey set to your cosmos db key
 
-[FunctionName("Message")]
-public static async Task<object> Run([HttpTrigger] HttpRequestMessage req, TraceWriter log)
+public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
 {
     log.Info($"Webhook was triggered!");
 
@@ -43,29 +42,4 @@ public static async Task<object> Run([HttpTrigger] HttpRequestMessage req, Trace
 
         return req.CreateResponse(HttpStatusCode.Accepted);
     }    
-}
-
-
-[FunctionName("Timer")]
-public static async Task<object> Run([TimerTrigger("* * * * *")]TimerInfo myTimer, TraceWriter log)
-{
-	log.Info($"Time trigger was triggered!");
-
-	//using (BotService.Initialize())
-	//{
-	//	string jsonContent = await req.Content.ReadAsStringAsync();
-	//	var activity = JsonConvert.DeserializeObject<Activity>(jsonContent);
-
-	//	if (!await BotService.Authenticator.TryAuthenticateAsync(req, new[] { activity }, CancellationToken.None))
-	//	{
-	//		return BotAuthenticator.GenerateUnauthorizedResponse(req);
-	//	}
-
-	//	if (activity != null)
-	//	{
-	//		Conversation.SendAsync(activity, () => new ProcessMessage());
-	//	}
-
-	//	return req.CreateResponse(HttpStatusCode.Accepted);
-	//}
 }
