@@ -2,7 +2,6 @@
 #load "ProcessMessage.csx"
 
 using System;
-using System.Net;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -21,6 +20,7 @@ using Microsoft.Bot.Connector;
 // -CosmosDbEndpoint set to your cosmos db endpoint
 // -CosmosDbKey set to your cosmos db key
 
+[FunctionName("Message")]
 public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
 {
     log.Info($"Webhook was triggered!");
@@ -40,6 +40,8 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
 			Conversation.SendAsync(activity, () => new ProcessMessage());
         }
 
-        return req.CreateResponse(HttpStatusCode.Accepted);
+        return req.CreateResponse("200");
     }    
 }
+
+
