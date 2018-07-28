@@ -1,5 +1,4 @@
-﻿[FunctionName("Timer")]
-public static async void RunTimer([TimerTrigger("0 * * * * *")] TimerInfo myTimer, TraceWriter log)
+﻿public static async Task<object> Run(TimerInfo timer, TraceWriter log)
 {
 	log.Info($"Timer was triggered!");
 
@@ -20,4 +19,5 @@ public static async void RunTimer([TimerTrigger("0 * * * * *")] TimerInfo myTime
 
 	//	return req.CreateResponse("200");
 	//}
+	return new HttpRequestMessage("200");
 }
