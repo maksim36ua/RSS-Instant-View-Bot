@@ -35,6 +35,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timer", "timer", "{91F13AAA-0447-4BAB-84C8-407C8F3A4FE5}"
 	ProjectSection(SolutionItems) = preProject
 		timer\function.json = timer\function.json
+		timer\ProcessMessage.csx = timer\ProcessMessage.csx
 		timer\run.csx = timer\run.csx
 	EndProjectSection
 EndProject

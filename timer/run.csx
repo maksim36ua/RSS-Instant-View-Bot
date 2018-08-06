@@ -1,4 +1,6 @@
-﻿public static async Task<object> Run(TimerInfo timer, TraceWriter log)
+﻿#load "ProcessMessage.csx"
+
+public static async Task<object> Run(TimerInfo timer, TraceWriter log)
 {
 	log.Info($"Timer was triggered!");
 
