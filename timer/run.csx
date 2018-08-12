@@ -21,5 +21,12 @@ public static async Task<object> Run(TimerInfo timer, TraceWriter log)
 
 	//	return req.CreateResponse("200");
 	//}
-	return new HttpRequestMessage("200");
+
+	var json = @"{
+				""chat_id"": ""142140266"",
+				""text"": ""SOME TEST MESSAGE"",
+			}";
+
+
+	return new HttpRequestMessage();
 }
