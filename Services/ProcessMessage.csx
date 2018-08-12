@@ -62,7 +62,7 @@ public class ProcessMessage : IDialog<object>
 	{
 		var json = @"{
 				""chat_id"": ""142140266"",
-				""text"": ""SOME TEST MESSAGE"",
+				""text"": ""{0}"",
 			}";
 
 		using (HttpClient client = new HttpClient())
@@ -75,9 +75,9 @@ public class ProcessMessage : IDialog<object>
 
 				HttpClient httpClient = new HttpClient();
 
-				foreach (var link in response.Descendants("link").Skip(2).Take(15).ToList())
+				foreach (var link in response.Descendants("link").Skip(2).Take(3).ToList())
 				{
-					var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+					var content = new StringContent(String.Format(json.ToString(), link), Encoding.UTF8, "application/json");
 					var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
 					log.Info(result.ToString());
 				}
