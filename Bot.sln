@@ -46,6 +46,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{7454812C-52C9-49FD-9909-377488C9328E}"
 	ProjectSection(SolutionItems) = preProject
+		Models\FeedModel.cs = Models\FeedModel.cs
+		Models\LastFeedPostModel.cs = Models\LastFeedPostModel.cs
 		Models\UserModel.cs = Models\UserModel.cs
 	EndProjectSection
 EndProject

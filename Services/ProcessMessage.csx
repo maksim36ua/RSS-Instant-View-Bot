@@ -1,4 +1,6 @@
 #load "../Models/UserModel.cs"
+#load "../Models/FeedModel.cs"
+#load "../Models/LastFeedPostModel.cs"
 
 using System;
 using System.Web;
@@ -11,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+using System.Globalization;
 
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -68,37 +71,55 @@ public class ProcessMessage : IDialog<object>
 
 		var storageAccount = CloudStorageAccount.Parse(System.Configuration.ConfigurationManager.AppSettings["AzureWebJobsStorage"]);
 		var tableClient = storageAccount.CreateCloudTableClient();
-		var table = tableClient.GetTableReference("users");
-		var users = table.ExecuteQuery(new TableQuery<UserModel>()).ToList();
 
-		foreach (var user in users)
+		var usersTable = tableClient.GetTableReference("users");
+		var users = usersTable.ExecuteQuery(new TableQuery<UserModel>()).ToList();
+
+		var feedsTable = tableClient.GetTableReference("feeds");
+		var feeds = feedsTable.ExecuteQuery(new TableQuery<FeedModel>()).ToList();
+
+		var lastFeedPostTable = tableClient.GetTableReference("lastFeedPost");
+		var lastFeedPosts = lastFeedPostTable.ExecuteQuery(new TableQuery<LastFeedPostModel>()).ToList();
+
+		foreach (var feed in feeds)
 		{
-			using (HttpClient client = new HttpClient())
+			foreach (var user in users)
 			{
-				try
+				using (HttpClient client = new HttpClient())
 				{
-					var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
-					XmlReader reader = XmlReader.Create(contentStream);
-					var response = XDocument.Load(reader);
-
-					HttpClient httpClient = new HttpClient();
-
-					foreach (var link in response.Descendants("link").Take(3).ToList())
+					try
 					{
-						var requestBody = new
-						{
-							chat_id = user.TelegramUserId,
-							text = link.Value
-						};
+						var contentStream = await (await client.GetAsync(feed.RssUrl)).Content.ReadAsStreamAsync();
+						XmlReader reader = XmlReader.Create(contentStream);
+						var response = XDocument.Load(reader);
 
-						var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-						var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
-						log.Info(result.ToString());
+						var lastFeedPost = lastFeedPosts.FirstOrDefault(q => q.TelegramUserId == user.TelegramUserId);
+
+						var items = response.Descendants("item")
+							.Where(q => DateTime.Parse(q.Descendants("pubDate").First().Value).ToUniversalTime() > lastFeedPost.LastPostTime)
+							.ToList();
+
+						foreach (var item in items)
+						{
+							var requestBody = new
+							{
+								chat_id = user.TelegramUserId,
+								text = item.Descendants("link").First().Value
+							};
+
+							var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+							var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
+							log.Info(result.ToString());
+						}
+
+						lastFeedPost.LastPostTime = DateTime.Parse(items.First().Descendants("pubDate").First().Value);
+
+						lastFeedPostTable.Execute(TableOperation.Replace(lastFeedPost));
 					}
-				}
-				catch (Exception ex)
-				{
-					log.Info(ex.Message);
+					catch (Exception ex)
+					{
+						log.Info(ex.Message);
+					}
 				}
 			}
 		}
@@ -112,7 +133,7 @@ public class ProcessMessage : IDialog<object>
 			var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
 			XmlReader reader = XmlReader.Create(contentStream);
 			var response = XDocument.Load(reader);
-			foreach (var link in response.Descendants("link").Take(15).ToList())
+			foreach (var link in response.Descendants("link").Skip(2).Take(15).ToList())
 			{
 				await context.PostAsync($"{link.Value}");
 			}
