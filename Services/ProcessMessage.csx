@@ -3,6 +3,8 @@ using System.Web;
 using System.Net.Http;
 using System.Xml;
 using System.Xml.Linq;
+using System.Text;
+using System.Configuration;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
@@ -54,6 +56,37 @@ public class ProcessMessage : IDialog<object>
 
 		context.Wait(MessageReceivedAsync);
 
+	}
+
+	public async Task PostArticles(TraceWriter log)
+	{
+		var json = @"{
+				""chat_id"": ""142140266"",
+				""text"": ""SOME TEST MESSAGE"",
+			}";
+
+		using (HttpClient client = new HttpClient())
+		{
+			try
+			{
+				var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
+				XmlReader reader = XmlReader.Create(contentStream);
+				var response = XDocument.Load(reader);
+
+				HttpClient httpClient = new HttpClient();
+
+				foreach (var link in response.Descendants("link").Skip(2).Take(15).ToList())
+				{
+					var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+					var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
+					log.Info(result.ToString());
+				}
+			}
+			catch (Exception ex)
+			{
+				log.Info(ex.Message);
+			}
+		}
 	}
 
 	public async Task GetArticles(IDialogContext context)

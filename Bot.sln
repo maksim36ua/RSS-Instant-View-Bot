@@ -27,7 +27,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messages", "messages", "{F4D9DF3B-F4E4-4E19-9053-3AF71A3189FA}"
 	ProjectSection(SolutionItems) = preProject
 		messages\function.json = messages\function.json
-		messages\ProcessMessage.csx = messages\ProcessMessage.csx
 		messages\project.json = messages\project.json
 		messages\project.lock.json = messages\project.lock.json
 		messages\run.csx = messages\run.csx
@@ -36,9 +35,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timer", "timer", "{91F13AAA-0447-4BAB-84C8-407C8F3A4FE5}"
 	ProjectSection(SolutionItems) = preProject
 		timer\function.json = timer\function.json
-		timer\ProcessMessage.csx = timer\ProcessMessage.csx
 		timer\project.json = timer\project.json
 		timer\run.csx = timer\run.csx
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{8AAB5FD7-1191-4AEB-A49B-6A9FA99153E7}"
+	ProjectSection(SolutionItems) = preProject
+		Services\ProcessMessage.csx = Services\ProcessMessage.csx
+		WebRequestService.cs = WebRequestService.cs
 	EndProjectSection
 EndProject
 Global
@@ -60,6 +64,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F4D9DF3B-F4E4-4E19-9053-3AF71A3189FA} = {36665A78-4D93-48C7-B432-4DA46AA140D5}
 		{91F13AAA-0447-4BAB-84C8-407C8F3A4FE5} = {36665A78-4D93-48C7-B432-4DA46AA140D5}
+		{8AAB5FD7-1191-4AEB-A49B-6A9FA99153E7} = {36665A78-4D93-48C7-B432-4DA46AA140D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE10963F-AF7E-42C3-B440-DBD2ACDA5FE9}

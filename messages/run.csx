@@ -1,5 +1,5 @@
 #r "Newtonsoft.Json"
-#load "ProcessMessage.csx"
+#load "../Services/ProcessMessage.csx"
 
 using System;
 using System.Threading;

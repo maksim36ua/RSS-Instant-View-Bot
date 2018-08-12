@@ -1,32 +1,22 @@
-﻿#load "ProcessMessage.csx"
+﻿#load "../Services/ProcessMessage.csx"
+
+using System;
+using System.Threading;
+using Newtonsoft.Json;
+
+using Microsoft.Bot.Builder.Azure;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 
 public static async Task<object> Run(TimerInfo timer, TraceWriter log)
 {
 	log.Info($"Timer was triggered!");
 
-	//using (BotService.Initialize())
-	//{
-	//	string jsonContent = await req.Content.ReadAsStringAsync();
-	//	var activity = JsonConvert.DeserializeObject<Activity>(jsonContent);
-
-	//	if (!await BotService.Authenticator.TryAuthenticateAsync(req, new[] { activity }, CancellationToken.None))
-	//	{
-	//		return BotAuthenticator.GenerateUnauthorizedResponse(req);
-	//	}
-
-	//	if (activity != null)
-	//	{
-	//		Conversation.SendAsync(activity, () => new ProcessMessage());
-	//	}
-
-	//	return req.CreateResponse("200");
-	//}
-
-	var json = @"{
-				""chat_id"": ""142140266"",
-				""text"": ""SOME TEST MESSAGE"",
-			}";
-
+	using (BotService.Initialize())
+	{
+		var processMessage = new ProcessMessage();
+		await processMessage.PostArticles(log);
+	}
 
 	return new HttpRequestMessage();
 }
