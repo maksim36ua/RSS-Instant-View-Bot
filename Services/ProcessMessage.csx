@@ -60,10 +60,10 @@ public class ProcessMessage : IDialog<object>
 
 	public async Task PostArticles(TraceWriter log)
 	{
-		var json = @"{
-				""chat_id"": ""142140266"",
-				""text"": ""{0}"",
-			}";
+		//var json = @"{
+		//		"chat_id"": ""142140266"",
+		//		""text"": ""{ 0} "",
+		//	}";
 
 		using (HttpClient client = new HttpClient())
 		{
@@ -77,7 +77,13 @@ public class ProcessMessage : IDialog<object>
 
 				foreach (var link in response.Descendants("link").Skip(2).Take(3).ToList())
 				{
-					var content = new StringContent(String.Format(json.ToString(), link), Encoding.UTF8, "application/json");
+					var requestBody = new
+					{
+						chat_id = 142140266,
+						text = link.Value
+					};
+
+					var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
 					var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
 					log.Info(result.ToString());
 				}
