@@ -83,7 +83,7 @@ public class ProcessMessage : IDialog<object>
 
 					HttpClient httpClient = new HttpClient();
 
-					foreach (var link in response.Descendants("link").Skip(2).Take(3).ToList())
+					foreach (var link in response.Descendants("link").Take(3).ToList())
 					{
 						var requestBody = new
 						{
@@ -112,7 +112,7 @@ public class ProcessMessage : IDialog<object>
 			var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
 			XmlReader reader = XmlReader.Create(contentStream);
 			var response = XDocument.Load(reader);
-			foreach (var link in response.Descendants("link").Skip(2).Take(15).ToList())
+			foreach (var link in response.Descendants("link").Take(15).ToList())
 			{
 				await context.PostAsync($"{link.Value}");
 			}
