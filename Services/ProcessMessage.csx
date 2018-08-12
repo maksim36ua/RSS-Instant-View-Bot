@@ -1,3 +1,5 @@
+#load "../Models/UserModel.cs"
+
 using System;
 using System.Web;
 using System.Net.Http;
@@ -9,6 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
+
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 
 [Serializable]
 public class ProcessMessage : IDialog<object>
@@ -60,39 +65,44 @@ public class ProcessMessage : IDialog<object>
 
 	public async Task PostArticles(TraceWriter log)
 	{
-		//var json = @"{
-		//		"chat_id"": ""142140266"",
-		//		""text"": ""{ 0} "",
-		//	}";
 
-		using (HttpClient client = new HttpClient())
+		var storageAccount = CloudStorageAccount.Parse(System.Configuration.ConfigurationManager.AppSettings["AzureWebJobsStorage"]);
+		var tableClient = storageAccount.CreateCloudTableClient();
+		var table = tableClient.GetTableReference("users");
+		var users = table.ExecuteQuery(new TableQuery<UserModel>()).ToList();
+
+		foreach (var user in users)
 		{
-			try
+			using (HttpClient client = new HttpClient())
 			{
-				var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
-				XmlReader reader = XmlReader.Create(contentStream);
-				var response = XDocument.Load(reader);
-
-				HttpClient httpClient = new HttpClient();
-
-				foreach (var link in response.Descendants("link").Skip(2).Take(3).ToList())
+				try
 				{
-					var requestBody = new
-					{
-						chat_id = 142140266,
-						text = link.Value
-					};
+					var contentStream = await (await client.GetAsync("https://nplus1.ru/rss")).Content.ReadAsStreamAsync();
+					XmlReader reader = XmlReader.Create(contentStream);
+					var response = XDocument.Load(reader);
 
-					var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-					var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
-					log.Info(result.ToString());
+					HttpClient httpClient = new HttpClient();
+
+					foreach (var link in response.Descendants("link").Skip(2).Take(3).ToList())
+					{
+						var requestBody = new
+						{
+							chat_id = user.TelegramUserId,
+							text = link.Value
+						};
+
+						var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+						var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
+						log.Info(result.ToString());
+					}
+				}
+				catch (Exception ex)
+				{
+					log.Info(ex.Message);
 				}
 			}
-			catch (Exception ex)
-			{
-				log.Info(ex.Message);
-			}
 		}
+
 	}
 
 	public async Task GetArticles(IDialogContext context)
