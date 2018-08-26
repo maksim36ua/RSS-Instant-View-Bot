@@ -93,11 +93,31 @@ public class ProcessMessage : IDialog<object>
 						XmlReader reader = XmlReader.Create(contentStream);
 						var response = XDocument.Load(reader);
 
-						var lastFeedPost = lastFeedPosts.FirstOrDefault(q => q.TelegramUserId == user.TelegramUserId);
+						var lastFeedPost = lastFeedPosts.FirstOrDefault(q => q.TelegramUserId == user.TelegramUserId && q.FeedName == feed.Name);
+
+						if (lastFeedPost == null)
+						{
+							lastFeedPost = new LastFeedPostModel
+							{
+								FeedName = feed.Name,
+								TelegramUserId = user.TelegramUserId,
+								LastPostTime = new DateTime(1602, 1, 1),
+								PartitionKey = Guid.NewGuid().ToString(),
+								RowKey = Guid.NewGuid().ToString()
+							};
+
+							lastFeedPostTable.Execute(TableOperation.Insert(lastFeedPost));
+						}
 
 						var items = response.Descendants("item")
 							.Where(q => DateTime.Parse(q.Descendants("pubDate").First().Value).ToUniversalTime() > lastFeedPost.LastPostTime)
 							.ToList();
+
+						if (items.Count() != 0)
+						{
+							lastFeedPost.LastPostTime = DateTime.Parse(items.First().Descendants("pubDate").First().Value);
+							lastFeedPostTable.Execute(TableOperation.Replace(lastFeedPost));
+						}
 
 						foreach (var item in items)
 						{
@@ -111,10 +131,6 @@ public class ProcessMessage : IDialog<object>
 							var result = await client.PostAsync(System.Configuration.ConfigurationManager.AppSettings["TelegramApiUrl"], content);
 							log.Info(result.ToString());
 						}
-
-						lastFeedPost.LastPostTime = DateTime.Parse(items.First().Descendants("pubDate").First().Value);
-
-						lastFeedPostTable.Execute(TableOperation.Replace(lastFeedPost));
 					}
 					catch (Exception ex)
 					{
